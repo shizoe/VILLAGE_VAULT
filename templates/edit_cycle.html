@@ -1,0 +1,58 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Edit Cycle</title>
+</head>
+<body>
+  <h1>Edit Investment Cycle</h1>
+  <form method="POST" action="{{ url_for('edit_cycle', cycle_id=cycle.id) }}">
+    {{ form.hidden_tag() }}
+    <div class="form-group">
+      {{ form.cycle_number.label }}
+      {{ form.cycle_number(class='form-control') }}
+      {% for error in form.cycle_number.errors %}
+        <span class="text-danger">{{ error }}</span>
+      {% endfor %}
+    </div>
+    <div class="form-group">
+      {{ form.start_date.label }}
+      {{ form.start_date(class='form-control') }}
+      {% for error in form.start_date.errors %}
+        <span class="text-danger">{{ error }}</span>
+      {% endfor %}
+    </div>
+    <div class="form-group">
+      {{ form.end_date.label }}
+      {{ form.end_date(class='form-control') }}
+      {% for error in form.end_date.errors %}
+        <span class="text-danger">{{ error }}</span>
+      {% endfor %}
+    </div>
+    <div class="form-group">
+      {{ form.interest_rate.label }}
+      {{ form.interest_rate(class='form-control') }}
+      {% for error in form.interest_rate.errors %}
+        <span class="text-danger">{{ error }}</span>
+      {% endfor %}
+    </div>
+    <div class="form-group">
+      {{ form.min_investment.label }}
+      {{ form.min_investment(class='form-control') }}
+      {% for error in form.min_investment.errors %}
+        <span class="text-danger">{{ error }}</span>
+      {% endfor %}
+    </div>
+    <div class="form-group">
+      {{ form.max_investment.label }}
+      {{ form.max_investment(class='form-control') }}
+      {% for error in form.max_investment.errors %}
+        <span class="text-danger">{{ error }}</span>
+      {% endfor %}
+    </div>
+    <div class="form-group">
+      {{ form.submit(class='btn btn-primary') }}
+    </div>
+  </form>
+</body>
+</html>

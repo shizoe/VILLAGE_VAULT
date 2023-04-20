@@ -1,0 +1,39 @@
+{% extends 'base.html' %}
+
+{% block content %}
+    <h1>Create User</h1>
+    <form method="POST" action="{{ url_for('main.add_member') }}">
+        {{ form.csrf_token }}
+        <div class="form-group mb-3">
+            {{ form.email.label }}
+            {{ form.email(class="form-control") }}
+            {% for error in form.email.errors %}
+                <span class="text-danger">{{ error }}</span>
+            {% endfor %}
+        </div>
+        <div class="form-group mb-3">
+            {{ form.name.label }}
+            {{ form.name(class="form-control") }}
+            {% for error in form.name.errors %}
+                <span class="text-danger">{{ error }}</span>
+            {% endfor %}
+        </div>
+        <div class="form-group mb-3">
+            {{ form.phone_number.label }}
+            {{ form.phone_number(class="form-control") }}
+            {% for error in form.phone_number.errors %}
+                <span class="text-danger">{{ error }}</span>
+            {% endfor %}
+        </div>
+        <div class="form-group mb-3">
+            {{ form.role.label }}
+            {{ form.role(class="form-control") }}
+            {% for error in form.role.errors %}
+                <span class="text-danger">{{ error }}</span>
+            {% endfor %}
+        </div>
+    <div>
+        {{ form.submit( class="btn btn-primary") }}
+    </div>
+    </form>
+{% endblock %}

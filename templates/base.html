@@ -1,0 +1,79 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Title</title>
+    <link rel="stylesheet" type="text/css" href="https://cdn.jsdelivr.net/npm/bootstrap@5.0.0-beta1/dist/css/bootstrap.min.css">
+    <link rel="stylesheet" type="text/css" href="https://cdn.jsdelivr.net/npm/boxicons@latest/css/boxicons.min.css">
+    <link rel="stylesheet" type="text/css" href="../static/css/base.css"  />
+    <script defer src="../static/js/base.js"></script>
+    <script src="../static/js/bootstrap.min.js"></script>
+    <script src="../static/js/popper.min.js"></script>
+    <script src="../static/js/jquery.min.js/"></script>
+<body id="body-pd">
+<header class="header" id="header">
+    <div class="header_toggle"> <i class='bx bx-menu' id="header-toggle"></i> </div>
+    <div class="header_img"> <img src="https://i.imgur.com/hczKIze.jpg" alt=""> </div>
+</header>
+<div class="l-navbar" id="nav-bar">
+    <nav class="nav">
+        <div>
+            <a href="#" class="nav_logo">
+                <i class='bx bx-layer nav_logo-icon'></i>
+                <span class="nav_logo-name">MWANDA V. BANK</span>
+            </a>
+            <div class="nav_list">
+                <a href="#" class="nav_link">
+                    <i class='bx bx-grid-alt nav_icon'></i>
+                    <span class="nav_name">Dashboard</span>
+                </a>
+                <a href="{{ url_for('main.add_investment')}}" class="nav_link">
+                    <i class='bx bx-money nav_icon'></i>
+                    <span class="nav_name">Add Investment</span>
+                </a> <a href="{{ url_for('main.add_loan') }}" class="nav_link">
+                <i class='bx bx-money-withdraw nav_icon'></i>
+                <span class="nav_name">Apply for Loan</span>
+            </a>
+                <a href="{{ url_for('main.add_member') }}" class="nav_link">
+                    <i class='bx bx-user nav_icon'></i>
+                    <span class="nav_name">Add Member</span>
+                </a>
+                <a href="{{ url_for('main.investments') }}" class="nav_link">
+                    <i class='bx bx-folder nav_icon'></i>
+                    <span class="nav_name">Investments</span>
+                </a>
+                <a href="{{ url_for('main.view_loans') }}" class="nav_link">
+                    <i class='bx bx-bar-chart-alt-2 nav_icon'></i>
+                    <span class="nav_name">Loans</span>
+                </a>
+            </div>
+        </div>
+        <a href="{{ url_for('auth.logout') }}" class="nav_link">
+            <i class='bx bx-log-out nav_icon'></i>
+            <span class="nav_name">SignOut</span>
+        </a>
+    </nav>
+</div>
+<!--Container Main start-->
+<div class="bg-light">
+    {% block content %}
+    {% endblock %}
+</div>
+<!--Container Main end-->
+<script>
+    // Get the current URL
+    const currentUrl = window.location.href;
+
+    // Get all the navigation links
+    const navLinks = document.querySelectorAll('.nav_link');
+
+    // Loop through each navigation link and check if its href matches the current URL
+    navLinks.forEach(link => {
+        const linkUrl = link.getAttribute('href');
+        if (currentUrl.includes(linkUrl)) {
+            link.classList.add('active');
+        }
+    });
+</script>
+</body>
+</html>

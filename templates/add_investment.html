@@ -1,0 +1,77 @@
+{% extends 'base.html' %}
+
+{% block content %}
+    <div class="horizontal-center">
+        <h1>Make Investment</h1>
+        <form method="post">
+            {{ form.csrf_token }}
+            <div class="form-group mb-3">
+                {{ form.cycle_id.label }}
+                {{ form.cycle_id(class="form-control", readonly="readonly") }}
+                {% for error in form.amount.errors %}
+                    <span class="text-danger">{{ error }}</span>
+                {% endfor %}
+            </div>
+            <div class="form-group mb-3">
+                {{ form.member_id.label }}
+                {{ form.member_id(class="form-control") }}
+                {% for error in form.member_id.errors %}
+                    <span class="text-danger">{{ error }}</span>
+                {% endfor %}
+            </div>
+            <div class="form-group mb-3">
+                {{ form.amount.label }}
+                {{ form.amount(class="form-control", id="amount-input") }}
+                {% for error in form.amount.errors %}
+                    <span class="text-danger">{{ error }}</span>
+                {% endfor %}
+            </div>
+            <div class="form-group mb-3">
+                {{ form.start_date.label }}
+                {{ form.start_date(class="form-control", readonly="readonly") }}
+                {% for error in form.start_date.errors %}
+                    <span class="text-danger">{{ error }}</span>
+                {% endfor %}
+            </div>
+            <div class="form-group mb-3">
+                {{ form.end_date.label }}
+                {{ form.end_date(class="form-control", readonly="readonly") }}
+                {% for error in form.end_date.errors %}
+                    <span class="text-danger">{{ error }}</span>
+                {% endfor %}
+
+            </div>
+            <div class="form-group mb-3">
+                {{ form.interest_rate.label }}
+                {{ form.interest_rate(class="form-control", readonly="readonly", id="interest-rate-input") }}
+                {% for error in form.interest_rate.errors %}
+                    <span class="text-danger">{{ error }}</span>
+                {% endfor %}
+            </div>
+            <div class="form-group mb-3">
+                {{ form.profit.label }}
+                {{ form.profit(class="form-control", readonly="readonly", id="profit-output") }}
+                {% for error in form.profit.errors %}
+                    <span class="text-danger">{{ error }}</span>
+                {% endfor %}
+            </div>
+
+            <button type="submit" class="btn btn-primary">Make Investment</button>
+        </form>
+    </div>
+
+    <script type="application/javascript">
+        $(document).ready(function() {
+            // Calculate profit when user inputs amount, start date, end date, and interest rate
+            $("#amount-input").on("input", function() {
+                var amount = parseFloat($("#amount-input").val());
+                var interestRate = parseFloat("{{ form.interest_rate.data }}");
+                var startDate = new Date("{{ form.start_date.data }}");
+                var endDate = new Date("{{ form.end_date.data }}");
+                var days = Math.floor((endDate - startDate) / (1000 * 60 * 60 * 24));
+                var profit = amount * (1 + interestRate) ** (days / 90) - amount;
+                $("#profit-output").val(profit.toFixed(2));
+            });
+        });
+    </script>
+{% endblock %}

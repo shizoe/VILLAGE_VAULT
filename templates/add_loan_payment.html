@@ -1,0 +1,11 @@
+  <h1>Add Payment for Loan {{ loan.id }}</h1>
+  <form method="post" action="{{ url_for('add_loan_payment', loan_id=loan.id) }}">
+    {{ form.csrf_token }}
+    <div class="form-group">
+      {{ form.amount_paid.label }} {{ form.amount_paid() }}
+    </div>
+    <div class="form-group">
+      {{ form.payment_date.label }} {{ form.payment_date() }}
+    </div>
+    <button type="submit" class="btn btn-primary">Add Payment</button>
+  </form>

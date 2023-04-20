@@ -1,0 +1,113 @@
+{% extends 'base.html' %}
+
+{% block content %}
+    <div class="horizontal-center">
+        <h1>Add Loan</h1>
+        <form method="POST" action="{{ url_for('main.add_loan') }}">
+            {{ form.csrf_token }}
+            <div class="form-group mb-3">
+                {{ form.member_id.label }}
+                {{ form.member_id(class="form-control") }}
+                {% for error in form.member_id.errors %}
+                    <span class="text-danger">{{ error }}</span>
+                {% endfor %}
+            </div>
+            <div class="form-group mb-3">
+                {{ form.amount.label }}
+                {{ form.amount(class="form-control", id="amount-input") }}
+            </div>
+                    <div class="form-group mb-3">
+                {{ form.funds_avaliable.label }}
+                {{ form.funds_avaliable(class="form-control", id="avaliable-funds", readonly="readonly") }}
+            </div>
+            <div class="form-group mb-3">
+                {{ form.start_date.label }}
+                {{ form.start_date(class="form-control", readonly="readonly") }}
+            </div>
+            <div class="form-group mb-3">
+                {{ form.end_date.label }}
+                {{ form.end_date(class="form-control", id="end-date") }}
+            </div>
+            <div class="form-group mb-3">
+                {{ form.max_date.label }}
+                {{ form.max_date(class="form-control", readonly="readonly") }}
+            </div>
+            <div class="form-group mb-3">
+                {{ form.interest_rate.label }}
+                {{ form.interest_rate(class="form-control", readonly="readonly") }}
+            </div>
+            <div class="form-group mb-3">
+                {{ form.payment_frequency.label }}
+                {{ form.payment_frequency(class="form-control", id="frequency") }}
+            </div>
+            <div class="form-group mb-3">
+                {{ form.amount_payable.label }}
+                {{ form.amount_payable(class="form-control", id="amount-output") }}
+            </div>
+
+            <div class="form-group mb-3">
+                {{ form.amount_install.label }}
+                {{ form.amount_install(class="form-control", id="amount-install") }}
+            </div>
+            <button type="submit" class="btn btn-primary">Add Loan</button>
+        </form>
+    </div>
+
+    <script type="application/javascript">
+        $(document).ready(function() {
+            // Calculate the amount payable using, start date, end date, and interest rate
+            $("#amount-input, #end-date").on("input", function() {
+                var amount = parseFloat($("#amount-input").val());
+                var interestRate = parseFloat("{{ form.interest_rate.data }}");
+                var startDate = new Date("{{ form.start_date.data }}");
+                var endDate = new Date($("#end-date").val());
+                var days = Math.floor((endDate - startDate) / (1000 * 60 * 60 * 24));
+                var payable = amount * (1 + interestRate) ** (days / 90);
+                $("#amount-output").val(payable.toFixed(2));
+                var frequency = parseInt($("#frequency").val());
+                var amount = parseFloat($("#amount-output").val());
+                var install = amount/frequency;
+                $("#amount-install").val(install.toFixed(2));
+            });
+        });
+    </script>
+
+    <script type="application/javascript">
+        $(document).ready(function() {
+            // Creating payment plan for each installment
+            $("#frequency").on("input", function() {
+                var frequency = parseInt($("#frequency").val());
+                var amount = parseFloat($("#amount-output").val());
+                var install = amount/frequency;
+                $("#amount-install").val(install.toFixed(2));
+            });
+        });
+    </script>
+    <script type="application/javascript">
+    const endDateInput = document.getElementById('end-date');
+    const maxDateInput = document.querySelector('input[name="max_date"]');
+    const maxAmountInput = document.getElementById('amount-input');
+    const maxAmountAvaliable = document.getElementById('avaliable-funds');
+
+    const validateForm = (event) => {
+        const endDate = new Date(endDateInput.value);
+        const maxDate = new Date(maxDateInput.value);
+        const amount = parseFloat(maxAmountInput.value);
+        const maxAmount = parseFloat(maxAmountAvaliable.value);
+
+        if (endDate > maxDate) {
+            event.preventDefault();
+            alert("Loan End date cannot be greater than Loan Maximum repayment date");
+        }
+
+        if (amount > maxAmount) {
+            event.preventDefault();
+            alert("Requested Loan Amount cannot be bigger than available funds");
+        }
+    };
+
+    const form = document.querySelector('form');
+    form.addEventListener('submit', validateForm);
+</script>
+
+{% endblock %}

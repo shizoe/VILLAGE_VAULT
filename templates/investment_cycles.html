@@ -1,0 +1,45 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Investment Cycles</title>
+</head>
+<body>
+  <h1>Investment Cycles</h1>
+  <table class="table">
+    <thead>
+      <tr>
+        <th>Cycle Number</th>
+        <th>Start Date</th>
+        <th>End Date</th>
+        <th>Interest Rate</th>
+        <th>Min Investment</th>
+        <th>Max Investment</th>
+        <th></th>
+      </tr>
+    </thead>
+    <tbody>
+      {% for cycle in cycles %}
+        <tr>
+          <td>{{ cycle.cycle_number }}</td>
+          <td>{{ cycle.start_date.strftime('%Y-%m-%d') }}</td>
+          <td>{{ cycle.end_date.strftime('%Y-%m-%d') }}</td>
+          <td>{{ cycle.interest_rate }}</td>
+          <td>{{ cycle.min_investment }}</td>
+          <td>{{ cycle.max_investment }}</td>
+            <td>{{ cycle.active }}</td>
+          <td>
+            <a href="{{ url_for('edit_cycle', cycle_id=cycle.id) }}" class="btn btn-secondary btn-sm">Edit</a>
+          </td>
+        </tr>
+      {% else %}
+        <tr>
+          <td colspan="7" class="text-center">No investment cycles found.</td>
+        </tr>
+      {% endfor %}
+    </tbody>
+  </table>
+
+  <a href="{{ url_for('add_cycle') }}" class="btn btn-primary">Add Cycle</a>
+</body>
+</html>

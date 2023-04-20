@@ -1,0 +1,43 @@
+{% extends 'base.html' %}
+
+{% block content %}
+    <h1>Loans</h1>
+    <table class="table">
+        <thead>
+        <tr>
+            <th>ID</th>
+            <th>Member</th>
+            <th>Amount</th>
+            <th>Start Date</th>
+            <th>End Date</th>
+            <th>Interest Rate</th>
+            <th>Payment Frequency</th>
+            <th>Amount Accrued</th>
+            <th>Total Paid</th>
+            <th>balance</th>
+            <th>Actions</th>
+        </tr>
+        </thead>
+        <tbody>
+        {% for loan in loans %}
+            <tr>
+                <td>{{ loan.id }}</td>
+                <td>{{ loan.users.fullname }}</td>
+                <td>{{ loan.amount }}</td>
+                <td>{{ loan.start_date.strftime('%Y-%m-%d') }}</td>
+                <td>{{ loan.end_date.strftime('%Y-%m-%d') }}</td>
+                <td>{{ loan.interest_rate }}</td>
+                <td>{{ loan.payment_frequency }}</td>
+                <td>{{ loan.amountdue }}</td>
+                <td>{{ loan.total_paid }}</td>
+                <td>{{ loan.balance }}</td>
+                <td>
+                    <a href="{{ url_for('main.view_loan', loan_id=loan.id) }}" class="btn btn-primary">View</a>
+                </td>
+            </tr>
+        {% endfor %}
+        </tbody>
+    </table>
+    <a href="{{ url_for('main.add_loan') }}" class="btn btn-primary">Add Loan</a>
+
+{% endblock %}

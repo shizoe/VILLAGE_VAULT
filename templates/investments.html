@@ -1,0 +1,38 @@
+{% extends 'base.html' %}
+
+{% block content %}
+    <h1>Investments</h1>
+    <table class="table">
+        <thead>
+        <tr>
+            <th>#</th>
+            <th>Cycle #</th>
+            <th>Member Name</th>
+            <th>Amount</th>
+            <th>Profit</th>
+            <th>Investment Date</th>
+            <th>Maturity Date</th>
+        </tr>
+        </thead>
+        <tbody>
+        {% for investment in investments %}
+            <tr>
+                <td>{{ investment.id }}</td>
+                <td>{{ investment.cycle_id }}</td>
+                <td>{{ investment.users.fullname }}</td>
+                <td>{{ investment.amount }}</td>
+                <td>{{ investment.profit }}</td>
+                <td>{{ investment.investment_date.strftime('%d-%m-%Y') }}</td>
+                <td>{{ investment.maturity_date.strftime('%d-%m-%Y') }}</td>
+            <td></td>
+
+            </tr>
+               {% else %}
+        <tr>
+          <td colspan="7" class="text-center">You Currently do not have any active investments.</td>
+        </tr>
+        {% endfor %}
+        </tbody>
+    </table>
+
+{% endblock %}
