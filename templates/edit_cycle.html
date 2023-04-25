@@ -1,16 +1,12 @@
-<!DOCTYPE html>
-<html lang="en">
-<head>
-    <meta charset="UTF-8">
-    <title>Edit Cycle</title>
-</head>
-<body>
+{% extends 'base.html' %}
+
+{% block content %}
   <h1>Edit Investment Cycle</h1>
   <form method="POST" action="{{ url_for('edit_cycle', cycle_id=cycle.id) }}">
     {{ form.hidden_tag() }}
     <div class="form-group">
       {{ form.cycle_number.label }}
-      {{ form.cycle_number(class='form-control') }}
+      {{ form.cycle_number(class='form-control', readonly='readonly') }}
       {% for error in form.cycle_number.errors %}
         <span class="text-danger">{{ error }}</span>
       {% endfor %}
@@ -50,9 +46,16 @@
         <span class="text-danger">{{ error }}</span>
       {% endfor %}
     </div>
+      <div class="form-group">
+      {{ form.active.label }}
+      {{ form.active() }}
+      {% for error in form.active.errors %}
+        <span class="text-danger">{{ error }}</span>
+      {% endfor %}
+    </div>
     <div class="form-group">
       {{ form.submit(class='btn btn-primary') }}
     </div>
   </form>
-</body>
-</html>
+
+{% endblock %}

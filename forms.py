@@ -60,6 +60,7 @@ class AddInvestmentCycleForm(FlaskForm):
     interest_rate = DecimalField('Interest Rate', validators=[DataRequired(), NumberRange(min=0.0, max=1.0)])
     min_investment = DecimalField('Minimum Investment', validators=[DataRequired(), NumberRange(min=0.01)])
     max_investment = DecimalField('Maximum Investment', validators=[DataRequired(), NumberRange(min=0.01)])
+    active = BooleanField('Cycle Active', validators=None)
     submit = SubmitField('Add Cycle')
 
 

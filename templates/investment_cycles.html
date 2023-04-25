@@ -1,10 +1,6 @@
-<!DOCTYPE html>
-<html lang="en">
-<head>
-    <meta charset="UTF-8">
-    <title>Investment Cycles</title>
-</head>
-<body>
+{% extends 'base.html' %}
+
+{% block content %}
   <h1>Investment Cycles</h1>
   <table class="table">
     <thead>
@@ -15,7 +11,8 @@
         <th>Interest Rate</th>
         <th>Min Investment</th>
         <th>Max Investment</th>
-        <th></th>
+        <th>Cycle Active</th>
+          <th>Actions</th>
       </tr>
     </thead>
     <tbody>
@@ -29,7 +26,7 @@
           <td>{{ cycle.max_investment }}</td>
             <td>{{ cycle.active }}</td>
           <td>
-            <a href="{{ url_for('edit_cycle', cycle_id=cycle.id) }}" class="btn btn-secondary btn-sm">Edit</a>
+            <a href="{{ url_for('main.edit_cycle', cycle_id=cycle.id) }}" class="btn btn-secondary btn-sm">Edit</a>
           </td>
         </tr>
       {% else %}
@@ -40,6 +37,6 @@
     </tbody>
   </table>
 
-  <a href="{{ url_for('add_cycle') }}" class="btn btn-primary">Add Cycle</a>
-</body>
-</html>
+  <a href="{{ url_for('main.add_cycle') }}" class="btn btn-primary">Add Cycle</a>
+
+{% endblock %}

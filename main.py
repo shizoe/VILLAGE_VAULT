@@ -8,7 +8,7 @@ from sqlalchemy import func, or_
 from auth import signup_post
 from database import db_session
 from forms import AddInvestmentCycleForm, AddMemberForm, MakeInvestmentForm, AddLoanForm, LoanPaymentForm
-from models import InvestmentCycle, Investment, Member, Loan, Payment, Role
+from models import InvestmentCycle, Investment, Member, Loan, Payment, Role, User
 
 main = Blueprint('main', __name__)
 
@@ -16,7 +16,7 @@ main = Blueprint('main', __name__)
 def admin_required(func):
     @wraps(func)
     def decorated_view(*args, **kwargs):
-        if current_user.roles[0].name != 'admin':
+        if not current_user.roles[0].name == 'admin':
             abort(403)  # Forbidden
         return func(*args, **kwargs)
 
@@ -26,8 +26,8 @@ def admin_required(func):
 def user_required(func):
     @wraps(func)
     def decorated_view(*args, **kwargs):
-        if not current_user.roles[0].name != 'admin' or \
-                current_user.roles[0].name != 'member':
+        if not current_user.roles[0].name == 'admin' and \
+                not current_user.roles[0].name == 'member':
             abort(403)  # Forbidden
         return func(*args, **kwargs)
 
@@ -38,7 +38,54 @@ def user_required(func):
 @login_required
 @user_required
 def home():
-    return render_template('home.html')
+    # Get the current user's investment and borrowing data
+    active_cycle = InvestmentCycle.query.filter(InvestmentCycle.active == True).first()
+    if current_user.roles[0].name != 'admin':
+        investments = db_session.query(func.sum(Investment.amount)).filter_by(member_id=current_user.id).scalar() or 0
+        borrowings = db_session.query(func.sum(Loan.amount)).filter_by(member_id=current_user.id).scalar() or 0
+        interest = db_session.query(func.sum(Investment.profit)).filter_by(member_id=current_user.id).scalar() or 0
+
+        # Calculate other metrics
+        total_invested = investments + interest
+        total_earned = round(interest - borrowings, 2)
+
+        investment = db_session.query(User.fullname, func.sum(Investment.amount)). \
+            join(Investment, User.id == Investment.member_id). \
+            filter(User.id == current_user.id). \
+            group_by(User.id).first()
+
+        loans = db_session.query(User.fullname, func.sum(Loan.amount)). \
+            join(Loan, User.id == Loan.member_id). \
+            filter(User.id == current_user.id). \
+            group_by(User.id).first()
+
+        return render_template('home.html', investments=investments, borrowings=borrowings,
+                               interest=interest, total_invested=total_invested, total_earned=total_earned,
+                               investment=investment, loans=loans, legend='Home')
+
+    else:
+        investments = db_session.query(func.sum(Investment.amount)).filter(
+            Investment.cycle_id == active_cycle.cycle_number).scalar() or 0
+        borrowings = db_session.query(func.sum(Loan.amount)).filter(
+            Loan.cycle_id == active_cycle.cycle_number).scalar() or 0
+        interest = db_session.query(func.sum(Investment.profit)).filter(
+            Investment.cycle_id == active_cycle.cycle_number).scalar() or 0
+
+        # Calculate other metrics
+        total_invested = investments + interest
+        total_earned = round(interest - borrowings, 2)
+
+        investment = db_session.query(User.fullname, func.sum(Investment.amount)). \
+            join(Investment, User.id == Investment.member_id). \
+            group_by(User.id).all()
+        loans = db_session.query(User.fullname, func.sum(Loan.amount)). \
+            join(Loan, User.id == Loan.member_id). \
+            group_by(User.id).all()
+
+        # Render the dashboard template with the data
+        return render_template('home.html', investments=investments, borrowings=borrowings,
+                               interest=interest, total_invested=total_invested, total_earned=total_earned,
+                               investment=investment, loans=loans)
 
 
 @main.route('/investments', methods=['GET', 'POST'])
@@ -60,7 +107,6 @@ def investments():
 @login_required
 @admin_required
 def investment_cycles():
-    return 'only admins can access this resource'
     form = AddInvestmentCycleForm()
     if form.validate_on_submit():
         cycle_number = form.cycle_number.data
@@ -151,7 +197,7 @@ def add_cycle():
 @login_required
 @admin_required
 def edit_cycle(cycle_id):
-    cycle = InvestmentCycle.query.get_or_404(cycle_id)
+    cycle = InvestmentCycle.query.filter(InvestmentCycle.cycle_number == cycle_id).first()
     form = AddInvestmentCycleForm(obj=cycle)
     if form.validate_on_submit():
         cycle.cycle_number = form.cycle_number.data
@@ -319,9 +365,12 @@ def view_loans():
         flash('There are no active investment cycles at the moment. Please add a new cycle.')
         return redirect(url_for('main.investment_cycles'))
 
-    loans = Loan.query.filter(Loan.member_id == current_user.id
-                              and or_(Loan.cycle_id == active_cycle.cycle_number, Loan.is_paid == False,
-                                      Loan.is_overdue == True)).all()
+    loans = Loan.query.filter(
+        Loan.member_id == current_user.id,
+        Loan.cycle_id == active_cycle.cycle_number,
+        Loan.is_paid == False,
+        Loan.is_overdue == True
+    ).all()
 
     for loan in loans:
         loan.amountdue = amount_due(loan.amount, loan.start_date, loan.cycle_id)

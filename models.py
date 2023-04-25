@@ -1,3 +1,4 @@
+import hashlib
 import secrets
 from datetime import datetime
 
@@ -64,6 +65,24 @@ class User(UserMixin, Base):
         data = {'email': self.email, 'active': self.active}
         return serializer.dumps(data)
 
+
+def create_admin():
+    email = 'admin@villagevault.com'
+    fullname = 'Admin'
+    phone_number = '097XXXXXX'
+    password = 'admin@123'
+    active = True
+    role = Role.query.filter_by(id=1).first()
+
+    admin = User.query.filter_by(email=email).first()
+    if admin is None:
+        admin = User(email=email, fullname=fullname, phone_number=phone_number,
+                     password=hashlib.sha256(password.encode()).hexdigest(), active=active)
+
+        #user_role = UserRoles(user=admin, role=role)
+        admin.roles.append(role)
+        db_session.add(admin)
+        db_session.commit()
 
 
 def decode_confirmation_token(token):

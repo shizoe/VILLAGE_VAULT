@@ -1,6 +1,129 @@
 {% extends 'base.html' %}
 
 {% block content %}
-<h1>Welcome to village banking app Dashboard</h1>
+    <h1>Dashboard</h1>
+    {% with messages = get_flashed_messages() %}
+        {% if messages %}
+
+            {% for message in messages %}
+                <div class="alert alert-success alert-dismissible fade show" role="alert">
+                    <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+                    {{ message }}
+                </div>
+
+            {% endfor %}
+
+        {% endif %}
+    {% endwith %}
+    <div class="container">
+        <div class="row">
+            <div class="col-sm-6 col-md-3">
+                <div class="card">
+                    <div class="card-body">
+                        <h5 class="card-title">Total Investment</h5>
+                        <h6 class="card-subtitle mb-2 text-muted">ZMK {{ investments }}</h6>
+                    </div>
+                </div>
+            </div>
+            <div class="col-sm-6 col-md-3">
+                <div class="card">
+                    <div class="card-body">
+                        <h5 class="card-title">Total Borrowed</h5>
+                        <h6 class="card-subtitle mb-2 text-muted">ZMK {{ borrowings }}</h6>
+                    </div>
+                </div>
+            </div>
+            <div class="col-sm-6 col-md-3">
+                <div class="card">
+                    <div class="card-body">
+                        <h5 class="card-title">Total Earned on Investment </h5>
+                        <h6 class="card-subtitle mb-2 text-muted">ZMK {{ interest }}</h6>
+                    </div>
+                </div>
+            </div>
+            <div class="col-sm-6 col-md-3">
+                <div class="card">
+                    <div class="card-body">
+                        <h5 class="card-title">Total Earned Minus Borrowed</h5>
+                        <h6 class="card-subtitle mb-2 text-muted">ZMK {{ total_earned }}</h6>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <hr>
+
+    <!-- Bar chart showing investment and borrowing amounts by user -->
+    <div class="card">
+        <div class="card-body">
+            <h5 class="card-title">Investment and Borrowing Amounts by User</h5>
+            <canvas id="investment-borrowing-chart"></canvas>
+        </div>
+    </div>
+
+    <!-- JavaScript code to create the bar chart -->
+    <script>
+        var ctx = document.getElementById('investment-borrowing-chart').getContext('2d');
+        var chart = new Chart(ctx, {
+            type: 'bar',
+            data: {
+                {% if current_user.roles[0].name != 'admin' %}
+                    {% if investment %}
+                        labels: {{ [investment[0]]|tojson }},
+                    {% else %}
+                        labels: [],
+                    {% endif %}
+                {% else %}
+                    labels: {{ investment|map(attribute='0')|list|tojson }},
+                {% endif %}
+
+                datasets: [{
+                    label: 'Invested',
+                    {% if current_user.roles[0].name != 'admin' %}
+                        {% if investment %}
+                            data: {{ [investment[1]]|tojson }},
+                        {% else %}
+                            data: [],
+                        {% endif %}
+                    {% else %}
+                        data: {{ investment|map(attribute='1')|list|tojson }},
+                    {% endif %}
+                    backgroundColor: 'rgba(54, 162, 235, 0.5)',
+                    borderColor: 'rgba(54, 162, 235, 1)',
+                    borderWidth: 1
+                },
+                    {
+                        label: 'Loans Taken',
+                        {% if current_user.roles[0].name != 'admin' %}
+                            {% if loans %}
+                                data: {{ [loans[1]]|tojson }},
+                            {% else %}
+                                data: [],
+                            {% endif %}
+                        {% else %}
+                            data: {{ loans|map(attribute='1')|list|tojson }},
+                        {% endif %}
+
+                        backgroundColor: 'rgba(255, 99, 132, 0.5)',
+                        borderColor: 'rgba(255, 99, 132, 1)',
+                        borderWidth: 1
+                    }
+                ]
+            },
+            options: {
+                scales: {
+                    y: {
+                        ticks: {
+                            callback: function(value, index, values) {
+                                return 'ZMK ' + value;
+                            }
+                        },
+                        beginAtZero: true
+                    }
+                }
+            }
+        });
+    </script>
 
 {% endblock %}

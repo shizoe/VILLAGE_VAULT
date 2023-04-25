@@ -2,6 +2,7 @@ import secrets
 from datetime import timedelta
 
 import flask
+import schedule as schedule
 from flask_login import LoginManager, current_user
 from mail import mail
 from main import main as main_blueprint
@@ -10,7 +11,7 @@ from flask import Flask, session, g
 from flask_security import Security, SQLAlchemyUserDatastore
 
 from database import init_db, db_session
-from models import User
+from models import create_admin
 from security import security, user_datastore
 
 app = Flask(__name__)
@@ -35,6 +36,7 @@ login_manager = LoginManager()
 login_manager.login_view = 'auth.index'
 login_manager.init_app(app)
 init_db()
+create_admin()
 
 
 @login_manager.user_loader
@@ -54,6 +56,15 @@ def before_request():
 @app.teardown_appcontext
 def shutdown_session(exception=None):
     db_session.remove()
+
+
+def cycle_status():
+    # The code you want to execute 5 minutes after midnight goes here
+    pass
+
+
+# Schedule the job to run every day at 12:05 AM
+schedule.every().day.at("00:00").do(cycle_status)
 
 
 if __name__ == '__main__':
