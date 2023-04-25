@@ -85,7 +85,7 @@ def home():
         # Render the dashboard template with the data
         return render_template('home.html', investments=investments, borrowings=borrowings,
                                interest=interest, total_invested=total_invested, total_earned=total_earned,
-                               investment=investment, loans=loans)
+                               investment=investment, loans=loans, active_cycle=active_cycle)
 
 
 @main.route('/investments', methods=['GET', 'POST'])
@@ -94,13 +94,21 @@ def home():
 def investments():
     active_cycle = InvestmentCycle.query.filter(InvestmentCycle.active == True).first()
 
-    if active_cycle is None:
-        flash('There are no active investment cycles at the moment.')
-        return redirect(url_for('main.investment_cycles'))
+    if current_user.roles[0].name == 'admin':
+        if active_cycle is None:
+            flash('There are no active investment cycles at the moment.')
+            return redirect(url_for('main.investment_cycles'))
+        else:
+            investments = Investment.query.filter(Investment.cycle_id == active_cycle.cycle_number).all()
+            return render_template('investments.html', investments=investments)
+    else:
+        if active_cycle is None:
+            flash('There are no active investment cycles at the moment.')
+            return redirect(url_for('main.home'))
+        investments = Investment.query.filter(Investment.cycle_id == active_cycle.cycle_number,
+                                              Investment.member_id == current_user.id).all()
+        return render_template('investments.html', investments=investments)
 
-    investments = Investment.query.filter(
-        Investment.cycle_id == active_cycle.cycle_number and Investment.users.id == current_user.id).all()
-    return render_template('investments.html', investments=investments)
 
 
 @main.route('/investment-cycles', methods=['GET', 'POST'])
@@ -361,30 +369,46 @@ def delete_loan_payment(payment_id):
 @user_required
 def view_loans():
     active_cycle = InvestmentCycle.query.filter(InvestmentCycle.active == True).first()
-    if active_cycle is None:
-        flash('There are no active investment cycles at the moment. Please add a new cycle.')
-        return redirect(url_for('main.investment_cycles'))
+    if current_user.roles[0].name == 'member':
 
-    loans = Loan.query.filter(
-        Loan.member_id == current_user.id,
-        Loan.cycle_id == active_cycle.cycle_number,
-        Loan.is_paid == False,
-        Loan.is_overdue == True
-    ).all()
+        loans = Loan.query.filter(Loan.member_id == current_user.id, or_(
+            Loan.cycle_id == active_cycle.cycle_number,
+            Loan.is_paid == False,
+            Loan.is_overdue == True)).all()
 
-    for loan in loans:
-        loan.amountdue = amount_due(loan.amount, loan.start_date, loan.cycle_id)
-        loan.penalty = calculate_penalty(loan.start_date, loan.id, loan.end_date)
-        payments = Payment.query.filter_by(loan_id=loan.id).all()
-        loan.total_paid = sum(payment.amount for payment in payments)
-        loan.balance = round(loan.amountdue - loan.total_paid, 2)
-        if loan.balance <= 0.0:
-            loan.is_paid = True
-            loan.is_overdue = False
-            loan.end_date = datetime.utcnow()
-        db_session.commit()
+        for loan in loans:
+            loan.amountdue = amount_due(loan.amount, loan.start_date, loan.cycle_id)
+            loan.penalty = calculate_penalty(loan.start_date, loan.id, loan.end_date)
+            payments = Payment.query.filter_by(loan_id=loan.id).all()
+            loan.total_paid = sum(payment.amount for payment in payments)
+            loan.balance = round(loan.amountdue - loan.total_paid, 2)
+            if loan.balance <= 0.0:
+                loan.is_paid = True
+                loan.is_overdue = False
+                loan.end_date = datetime.utcnow()
+            db_session.commit()
 
-    return render_template('loans.html', loans=loans)
+        return render_template('loans.html', loans=loans)
+    else:
+        loans = Loan.query.filter(or_(
+            Loan.cycle_id == active_cycle.cycle_number,
+            Loan.is_paid == False,
+            Loan.is_overdue == True)).all()
+
+        for loan in loans:
+            loan.amountdue = amount_due(loan.amount, loan.start_date, loan.cycle_id)
+            loan.penalty = calculate_penalty(loan.start_date, loan.id, loan.end_date)
+            payments = Payment.query.filter_by(loan_id=loan.id).all()
+            loan.total_paid = sum(payment.amount for payment in payments)
+            loan.balance = round(loan.amountdue - loan.total_paid, 2)
+            if loan.balance <= 0.0:
+                loan.is_paid = True
+                loan.is_overdue = False
+                loan.end_date = datetime.utcnow()
+            db_session.commit()
+
+        return render_template('loans.html', loans=loans)
+
 
 
 # Route to view details of a loan

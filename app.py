@@ -64,7 +64,7 @@ def cycle_status():
 
 
 # Schedule the job to run every day at 12:05 AM
-schedule.every().day.at("00:00").do(cycle_status)
+schedule.every().day.at("00:05").do(cycle_status)
 
 
 if __name__ == '__main__':

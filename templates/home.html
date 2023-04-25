@@ -71,11 +71,16 @@
                 {% if current_user.roles[0].name != 'admin' %}
                     {% if investment %}
                         labels: {{ [investment[0]]|tojson }},
+                    {% elif loans %}
+                        labels: {{ [loans[0]]|tojson }},
                     {% else %}
                         labels: [],
                     {% endif %}
                 {% else %}
-                    labels: {{ investment|map(attribute='0')|list|tojson }},
+                    {% if investment and loans %}
+                        labels: {{ investment|map(attribute='0')|list|tojson }},
+                        labels: {{ loans |map(attribute='0')|list|tojson }},
+                    {% endif %}
                 {% endif %}
 
                 datasets: [{
